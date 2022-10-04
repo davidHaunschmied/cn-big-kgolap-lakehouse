@@ -13,14 +13,6 @@ import java.nio.charset.Charset;
 
 public class AixmMapper implements Mapper {
 
-    public static void main(String[] args) throws IOException {
-        File f = new File("D:\\OneDrive - Johannes Kepler Universität Linz\\Master Thesis\\NOTAMS\\20180201_EDDF_AirportHeliport_76.xml");
-        AixmMapper aixmMapper = new AixmMapper();
-        Model defaultModel = ModelFactory.createDefaultModel();
-        aixmMapper.map(IOUtils.toString(new FileInputStream(f), Charset.defaultCharset()), defaultModel);
-        defaultModel.write(System.out, "N-TRIPLE");
-    }
-
     @Override
     public void map(String data, Model model) {
         AixmToRdfSAXParser aixmToRdfSAXParser = new AixmToRdfSAXParser(model);

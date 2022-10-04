@@ -5,8 +5,6 @@ include 'shared-api'
 include 'aixm-engine'
 include 'circulator'
 include 'iwxxm-engine'
-include 'file-uploader'
-include 'query-perf-test'
 include 'svc-shared'
 include 'web-ui'
 

@@ -1,5 +1,7 @@
-# PRIVATE REPO - Use public one instead: Big KG-OLAP Lakehouse
-A cloud-native data lakehouse to store big knowledge graphs and perform contextualized operations on them.
+# A Cloud-Native Data Lakehouse Architecture for Big Knowledge Graph OLAP
+This project was originally developed withn a master thesis that investigated the scalability of
+Knowledge Graph OLAP (KG-OLAP) - a conceptual framework for working with contextualized knowledge graphs - by proposing and implementing a cloud-native architecture.
+The master thesis is attached in PDF format in the _doc_ folder.
 
 ## Introduction
 Knowledge graphs (KGs) represent real objects and the relationships to each other. KGs
