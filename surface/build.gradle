@@ -1,0 +1,6 @@
+ext.appPort = 8080
+apply from: '../gradle/spring-boot-svc-base.gradle'
+
+dependencies{
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+}

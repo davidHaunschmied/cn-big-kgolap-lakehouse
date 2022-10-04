@@ -1,0 +1,19 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.apache.jena/jena-core
+    api 'org.apache.jena:jena-core:4.1.0'
+
+    // https://mvnrepository.com/artifact/org.apache.jena/jena-arq
+    api 'org.apache.jena:jena-arq:4.1.0'
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    api 'org.slf4j:slf4j-api:1.7.32'
+
+    // https://mvnrepository.com/artifact/ch.qos.logback/logback-core
+    api 'ch.qos.logback:logback-classic:1.2.5'
+
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+}

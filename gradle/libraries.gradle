@@ -1,0 +1,4 @@
+ext['lombok.version'] = '1.18.22'
+ext['assertj.version'] = '3.6.1'
+ext['junit-jupiter.version'] = '5.6.0'
+ext['spring.version'] = '5.3.13'

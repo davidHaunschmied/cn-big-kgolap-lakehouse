@@ -1,0 +1,34 @@
+ext.appPort = 80
+
+task npmInstall(type: Exec) {
+  workingDir './'
+
+  // windows
+  commandLine 'npm.cmd', 'install'
+}
+
+task npmBuildProd(type: Exec, dependsOn: npmInstall) {
+  workingDir './'
+
+  commandLine 'npm.cmd', 'run', 'buildProd'
+  tasks.build.dependsOn(it)
+}
+
+task buildDockerImage(type: Exec, dependsOn: npmBuildProd) {
+  group 'build'
+  workingDir './'
+
+  //on windows:
+  commandLine 'docker', 'build', '-f', '../docker/ui/Dockerfile',
+    '--build-arg', "APP_NAME=${project.name}",
+    '--build-arg', "PORT=${project.appPort}",
+    '-t', "${dockerBaseRepository}/${project.name}:${project.version}",
+    '.'
+}
+
+task pushDockerImage(type: Exec, dependsOn: buildDockerImage) {
+  group 'publish'
+  workingDir './'
+
+  commandLine 'docker', 'push', "${dockerBaseRepository}/${project.name}:${project.version}"
+}

@@ -1,0 +1,6 @@
+ext.appPort = 9091
+apply from: '../gradle/spring-boot-svc-base.gradle'
+
+dependencies {
+    implementation 'net.devh:grpc-server-spring-boot-starter:2.13.0.RELEASE'
+}

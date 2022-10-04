@@ -1,0 +1,84 @@
+plugins {
+    id 'java-library'
+    id 'com.google.protobuf'
+}
+
+ext.grpcVersion = '1.43.1'
+
+dependencies {
+    api project(':shared-api')
+
+    api "io.grpc:grpc-netty:${grpcVersion}"
+    api "io.grpc:grpc-protobuf:${grpcVersion}"
+    api "io.grpc:grpc-stub:${grpcVersion}"
+
+    runtimeOnly project(':iwxxm-engine')
+    runtimeOnly project(':aixm-engine')
+
+    implementation('redis.clients:jedis:4.1.1')
+
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.133'
+    implementation 'software.aws.mcs:aws-sigv4-auth-cassandra-java-driver-plugin:4.0.4'
+
+    implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.133'
+
+    implementation("org.springframework:spring-context-support:5.3.13")
+    implementation("org.springframework.boot:spring-boot-autoconfigure:2.6.0")
+    implementation('org.springframework:spring-web:5.3.13')
+
+    implementation('org.springframework.data:spring-data-cassandra:3.3.0'){
+        exclude group: 'redis.clients', module: 'jedis'
+    }
+
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.6.0'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.0'
+
+    testImplementation('org.springframework:spring-test:5.3.13')
+    testImplementation('org.mockito:mockito-core:3.9.0')
+
+}
+
+def genSrcDir = "$projectDir/src/generated"
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download from repositories
+        artifact = 'com.google.protobuf:protoc:3.0.0'
+    }
+
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.0.0-pre2'
+            // or
+            // path = 'tools/protoc-gen-grpc-java'
+        }
+
+    }
+
+    generatedFilesBaseDir = genSrcDir
+
+    clean {
+        delete generatedFilesBaseDir
+    }
+
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+
+    // generatedFilesBaseDir = "$projectDir/gen"
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir genSrcDir
+        }
+    }
+}
+
+tasks.build.dependsOn('generateProto')

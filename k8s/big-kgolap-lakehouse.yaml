@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: big-kgolap-lakehouse
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: big-kgolap-lakehouse-surface
+  namespace: big-kgolap-lakehouse
+  labels:
+    app: big-kgolap-lakehouse-surface
+spec:
+  replicas: 1 # TODO change for prod
+  selector:
+    matchLabels:
+      app: big-kgolap-lakehouse-surface
+  template:
+    metadata:
+      labels:
+        app: big-kgolap-lakehouse-surface
+    spec:
+      containers:
+        - name: surface
+          image: jku-dke/big-kgolap-lakehouse/surface:0.1
+          imagePullPolicy: Never # necessary for local deployment
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "aws"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-2"
+          ports:
+            - containerPort: 8080
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: big-kgolap-lakehouse-bed
+  namespace: big-kgolap-lakehouse
+  labels:
+    app: big-kgolap-lakehouse-bed
+spec:
+  replicas: 1 # TODO change for prod
+  selector:
+    matchLabels:
+      app: big-kgolap-lakehouse-bed
+  template:
+    metadata:
+      labels:
+        app: big-kgolap-lakehouse-bed
+    spec:
+      containers:
+        - name: bed
+          image: jku-dke/big-kgolap-lakehouse/bed:0.1
+          imagePullPolicy: Never # necessary for local deployment
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "aws"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-2"
+          ports:
+            - containerPort: 9091
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: big-kgolap-lakehouse-circulator
+  namespace: big-kgolap-lakehouse
+  labels:
+    app: big-kgolap-lakehouse-circulator
+spec:
+  replicas: 1 # TODO change for prod
+  selector:
+    matchLabels:
+      app: big-kgolap-lakehouse-circulator
+  template:
+    metadata:
+      labels:
+        app: big-kgolap-lakehouse-circulator
+    spec:
+      containers:
+        - name: circulator
+          image: jku-dke/big-kgolap-lakehouse/circulator:0.1
+          imagePullPolicy: Never # necessary for local deployment
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "aws"
+            - name: AWS_DEFAULT_REGION
+              value: "us-east-2"
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: big-kgolap-lakehouse-surface-svc
+spec:
+  selector:
+    app: big-kgolap-lakehouse-surface
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: big-kgolap-lakehouse-bed-svc
+spec:
+  selector:
+    app: big-kgolap-lakehouse-bed
+  ports:
+    - protocol: TCP
+      port: 9091
+      targetPort: 9091

@@ -1,0 +1,154 @@
+<div class="container-fluid p-5">
+
+  <div class="row">
+    <h1>Big KG-OLAP Data Lakehouse</h1>
+  </div>
+  <div class="row">
+    <div class="col-1">
+      <button (click)="loadInfos()" class="btn btn-outline-info btn-sm">Load statistics</button>
+    </div>
+    <span *ngIf="lakehouseStats" class="col-11">
+        <strong>{{lakehouseStats.totalIndices}}</strong> total indices |
+        <strong>{{lakehouseStats.totalContexts}}</strong> total contexts/cells |
+        <strong>{{lakehouseStats.totalFiles}}</strong> distinct files |
+        <strong>{{lakehouseStats.totalStoredFileSizeMB | number: '1.2-2'}}</strong> MiB storage used |
+        ~ <strong>{{calculateVirtualGraphSize(lakehouseStats) | number: '1.2-2'}}</strong> GiB virtual graph size (Avg file size * indices)
+    </span>
+  </div>
+  <br/>
+  <div class="row">
+    <div class="col-6 border p-2">
+      <div class="row">
+        <div class="h5">Query RDF cube (N-QUAD format)</div>
+        <div class="form">
+          <div class="form-group">
+            <label for="query">Insert KG-OLAP query:</label>
+            <textarea [(ngModel)]="kgOlapQuery" class="form-control" id="query"></textarea>
+
+            <small>
+              <a (click)="showSyntax = !showSyntax" style="cursor: pointer">
+                <u><strong>{{showSyntax ? 'Hide' : 'Show syntax and available dimensions/levels'}}</strong></u>
+              </a>
+              <div *ngIf="showSyntax">
+                <strong>Syntax:</strong><br/>
+                SELECT level=VALUE AND level2=VALUE2 AND ...<br/>
+                ROLLUP ON all_level1, level3, level4, ...
+                <br/><br/>
+                <strong>Available dimensions and levels:</strong><br/>
+                <ng-container *ngIf="(levels$ | async) !== null && (levels$ | async) as levels">
+                  <ng-container *ngFor="let dimension of getKeys(levels)">
+                    <div>Levels for dimension <strong>{{dimension}}</strong>:</div>
+                    <ul class="list-group offset-1">
+                      <li><strong>{{dimension}}_all</strong> (ROLLUP ON CLAUSE only)</li>
+                      <li *ngFor="let dimLevel of getValue(levels, dimension)">
+                        <strong>{{dimLevel.name.toLowerCase()}}</strong> : {{dimLevel.type}}
+                        <ng-container *ngIf="dimLevel.type == 'LocalDate'">(Format: yyyy-MM-dd)
+                        </ng-container>
+                        <ng-container *ngIf="dimLevel.type == 'Year'">(Format: yyyy)
+                        </ng-container>
+                        <ng-container *ngIf="dimLevel.type == 'YearMonth'">(Format: yyyy-MM)
+                        </ng-container>
+                      </li>
+                    </ul>
+                    <br/>
+                  </ng-container>
+                </ng-container>
+              </div>
+              <br/>
+              <strong>Examples:</strong><br/>
+              <ul class="list-group offset-1">
+                <li>SELECT * ROLLUP ON topic_all, location_all, time_all</li>
+                <li>SELECT time_month=2021-05 AND location_location=LOWS</li>
+                <li>SELECT time_year=2021 AND location_fir=EDMM AND topic_family=FlightRestrictions ROLLUP
+                  ON time_all,
+                  location_fir
+                </li>
+                <li>SELECT time_day=2021-12-01 AND location_territory=Germany ROLLUP ON location_fir,
+                  topic_all
+                </li>
+              </ul>
+            </small>
+          </div>
+          <br/>
+          <button (click)="query()" class="btn btn-primary">Query cube</button>
+        </div>
+      </div>
+      <br/>
+      <div *ngIf="cubeResult !== null" class="row">
+        <div class="h5">Cube result</div>
+        <div *ngIf="cubeResult">
+          <div class="h6">{{cubeResultSizeMb | number}} MB in total</div>
+          <div class="col-12">
+            <pre>{{cubeResult.slice(0, 10000)}}</pre>
+            <!--<xml-viewer-component [xml]="queryResult"></xml-viewer-component>-->
+          </div>
+        </div>
+        <div *ngIf="!cubeResult">
+          Query returned no results.
+        </div>
+      </div>
+      <div *ngIf="queryError" class="row">
+        <div class="h5">Error</div>
+        <div class="col-12">
+          <span>{{queryError}}</span>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 border p-2">
+      <div class="row">
+        <div class="h5">Sink new files</div>
+        <div class="form">
+          <div class="form-group">
+            <label for="files">Files</label>
+            <input (change)="handleFileInput($event)" [multiple]="true" class="form-control" id="files"
+                   type="file">
+          </div>
+          <br/>
+          <div class="form-group">
+            <label for="types">Data type</label>
+            <select class="form-control" id="types" name="types">
+              <option value="aixm">AIXM</option>
+            </select>
+          </div>
+          <br/>
+          <button (click)="uploadFiles()" class="btn btn-primary">Sink</button>
+        </div>
+      </div>
+      <br/>
+      <div class="row">
+        <div class="h5">Query log
+          <button (click)="loadQueryLogs()" class="btn btn-outline-info btn-sm">Reload</button>
+        </div>
+        <div *ngIf="queryLogs" class="col-12">
+          <ng-container *ngFor="let queryLog of queryLogs">
+                    <span *ngIf="queryLog.success == true">
+                        Query <strong>{{queryLog.query}}</strong> took <strong>{{queryLog.durationMillis / 1000 | number: '1.2-2'}}
+                      s</strong><br/>
+                        Quads: <strong>{{queryLog.quads}}</strong> | Returned contexts: <strong>{{queryLog.contexts}}</strong> | Considered cells: <strong>{{queryLog.contextRequests}}</strong><br/>
+                        Details: QueryRelevant: <strong>{{queryLog.dur1QueryRelevantMillis}} ms</strong> | QueryGeneral: <strong>{{queryLog.dur2QueryGeneralMillis}}
+                      ms</strong> |
+                        PrepareQuery: <strong>{{queryLog.dur3PrepareQueryMillis}}
+                      ms</strong> | MapReduce: <strong>{{queryLog.dur4BuildGraphMillis}} ms</strong><br/>
+                        Graph cache hit ratio: <strong>{{queryLog.graphInMemCacheHitRatio | percent}}</strong> |
+                      <!--Local file cache hit ratio: <strong>{{queryLog.localFileCacheHitRatio | percent}}</strong>;-->
+                    </span>
+            <span *ngIf="queryLog.success == false">
+                            Query <strong>{{queryLog.query}}</strong> failed with message: {{queryLog.exceptionMessage}}
+                        </span>
+            {{queryLog.start}}
+            <br/>
+            <br/>
+          </ng-container>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-6 border p-2">
+      <app-file-upload-chart *ngIf="fileUploadsPerMin" [ingestionLogs]="fileUploadsPerMin"></app-file-upload-chart>
+    </div>
+    <div class="col-6 border p-2">
+      <app-file-ingestion-chart *ngIf="completionsPerMin"
+                                [ingestionsPerMinute]="completionsPerMin"></app-file-ingestion-chart>
+    </div>
+  </div>
+</div>

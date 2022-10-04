@@ -1,0 +1,18 @@
+syntax = "proto3";
+option java_multiple_files = true;
+
+package at.jku.dke.bigkgolap.shared.grpc;
+
+message GraphQueryRequest {
+  string queryUuid = 1;
+  string contextId = 2; // contexts containing knowledge that must be included in the final graph
+  repeated string graphs = 3; // the graphs (=contexts) to construct the quads
+}
+
+message GraphQueryResponse {
+  repeated string quads = 1;
+}
+
+service GraphQueryService {
+  rpc queryGraph(GraphQueryRequest) returns (stream GraphQueryResponse);
+}

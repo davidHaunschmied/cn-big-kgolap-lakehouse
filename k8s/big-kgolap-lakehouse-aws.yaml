@@ -1,0 +1,216 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: big-kgolap-lakehouse
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: big-kgolap-lakehouse-web-ui
+  namespace: big-kgolap-lakehouse
+  labels:
+    app: big-kgolap-lakehouse-web-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: big-kgolap-lakehouse-web-ui
+  template:
+    metadata:
+      labels:
+        app: big-kgolap-lakehouse-web-ui
+    spec:
+      containers:
+        - name: web-ui
+          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/big-kgolap-lakehouse/web-ui:0.1
+          imagePullPolicy: Always
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: big-kgolap-lakehouse-surface
+  namespace: big-kgolap-lakehouse
+  labels:
+    app: big-kgolap-lakehouse-surface
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: big-kgolap-lakehouse-surface
+  template:
+    metadata:
+      labels:
+        app: big-kgolap-lakehouse-surface
+    spec:
+      containers:
+        - name: surface
+          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/big-kgolap-lakehouse/surface:0.1
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "aws"
+            - name: BED_HOST
+              value: "big-kgolap-lakehouse-bed-svc"
+            - name: REDIS_HOST
+              value: "big-kgolap-lakehouese-redis.rjeq9v.clustercfg.memorydb.us-east-2.amazonaws.com"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 1
+              memory: "4Gi"
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: big-kgolap-lakehouse-bed
+  namespace: big-kgolap-lakehouse
+  labels:
+    app: big-kgolap-lakehouse-bed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: big-kgolap-lakehouse-bed
+  template:
+    metadata:
+      labels:
+        app: big-kgolap-lakehouse-bed
+    spec:
+      containers:
+        - name: bed
+          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/big-kgolap-lakehouse/bed:0.1
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "aws"
+            - name: BED_HOST
+              value: "big-kgolap-lakehouse-bed-svc"
+            - name: REDIS_HOST
+              value: "big-kgolap-lakehouese-redis.rjeq9v.clustercfg.memorydb.us-east-2.amazonaws.com"
+          ports:
+            - containerPort: 9091
+          resources:
+            requests:
+              cpu: 1
+              memory: "2Gi"
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: big-kgolap-lakehouse-circulator
+  namespace: big-kgolap-lakehouse
+  labels:
+    app: big-kgolap-lakehouse-circulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: big-kgolap-lakehouse-circulator
+  template:
+    metadata:
+      labels:
+        app: big-kgolap-lakehouse-circulator
+    spec:
+      containers:
+        - name: circulator
+          image: AWS_ACCOUNT_ID.dkr.ecr.us-east-2.amazonaws.com/big-kgolap-lakehouse/circulator:0.1
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "aws"
+            - name: REDIS_HOST
+              value: "big-kgolap-lakehouese-redis.rjeq9v.clustercfg.memorydb.us-east-2.amazonaws.com"
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: big-kgolap-lakehouse-web-ui-svc
+  namespace: big-kgolap-lakehouse
+spec:
+  selector:
+    app: big-kgolap-lakehouse-web-ui
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: big-kgolap-lakehouse-surface-svc
+  namespace: big-kgolap-lakehouse
+spec:
+  selector:
+    app: big-kgolap-lakehouse-surface
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: big-kgolap-lakehouse-bed-svc
+  namespace: big-kgolap-lakehouse
+spec:
+  selector:
+    app: big-kgolap-lakehouse-bed
+  ports:
+    - protocol: TCP
+      port: 9091
+      targetPort: 9091
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: big-kgolap-lakehouse
+  name: big-kgolap-lakehouse-web-ui-svc-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: big-kgolap-lakehouse-web-ui-svc
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: big-kgolap-lakehouse
+  name: big-kgolap-lakehouse-surface-svc-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=600
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: big-kgolap-lakehouse-surface-svc
+                port:
+                  number: 8080

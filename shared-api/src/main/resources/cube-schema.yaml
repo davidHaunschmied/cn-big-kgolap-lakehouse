@@ -1,0 +1,128 @@
+schema:
+  dimensions:
+    location: # dimension
+      territory: # level
+        depth: 0 # important for order
+        rollUpLevel: ALL
+        javaDataType: java.lang.String
+      fir:
+        depth: 1
+        rollUpLevel: territory
+        javaDataType: java.lang.String
+      location:
+        depth: 2
+        rollUpLevel: fir
+        javaDataType: java.lang.String
+    topic:
+      category:
+        depth: 0
+        rollUpLevel: ALL
+        javaDataType: java.lang.String
+      family:
+        depth: 1
+        rollUpLevel: category
+        javaDataType: java.lang.String
+      feature:
+        depth: 2
+        rollUpLevel: family
+        javaDataType: java.lang.String
+
+    time:
+      year:
+        depth: 0
+        rollUpLevel: ALL
+        javaDataType: java.time.Year
+      month:
+        depth: 1
+        rollUpLevel: year
+        javaDataType: java.time.YearMonth
+      day:
+        depth: 2
+        rollUpLevel: month
+        javaDataType: java.time.LocalDate
+
+  hierarchies:
+    location:
+      - territory: Austria
+        fir: LOVV
+        location: LOWW
+      - territory: Austria
+        fir: LOVV
+        location: LOWS
+      - territory: Germany
+        fir: EDMM
+        location: EDJA
+      - territory: Germany
+        fir: EDMM
+        location: EDMO
+      - territory: Germany
+        fir: EDGG
+        location: EDGP
+      - territory: Germany
+        fir: EDGG
+        location: EDDF
+      - territory: France
+        fir: LFBB
+        location: LFBD
+      - territory: France
+        fir: LFBB
+        location: LFFA
+      - territory: France
+        fir: LFMM
+        location: LFMA
+      - territory: France
+        fir: LFMM
+        location: LFMB
+      - territory: Donlon
+        fir: EAAD
+        location: EADD
+      - territory: Donlon
+        fir: EAAD
+        location: EADH
+
+    topic:
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: AirportHeliport # A defined area on land or water (including any buildings, installations and equipment) intended to be used either wholly or in part for the arrival, departure and surface movement of aircraft/helicopters.
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: NonMovementArea # Area where aircraft cannot be seen by a control tower and therefore are restricted to move.
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: SurveyControlPoint # A monumented survey control point. Or A surveying reference point marked by a permanently fixed marker.
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: AirportHotSpot # A location on aerodrome movement area with a history or potential risk of collision or runway incursion, and where heightened attention by pilots/drivers is necessary.
+      - category: AirportHeliport
+        family: Apron
+        feature: ApronElement # Parts of a defined apron area. ApronElements may have functional characteristics defined in the ApronElement type. ApronElements may have jetway, fuel, towing, docking and ground power services.
+      - category: AirportHeliport
+        family: Apron # A defined area, on a land aerodrome/heliport, intended to accommodate aircraft/helicopters for purposes of loading and unloading passengers, mail or cargo, and for fuelling, parking or maintenance.
+        feature: AircraftStand # A designated area on an apron intended to be used for parking an aircraft.
+      - category: AirportHeliport
+        family: Apron # A defined area, on a land aerodrome/heliport, intended to accommodate aircraft/helicopters for purposes of loading and unloading passengers, mail or cargo, and for fuelling, parking or maintenance.
+        feature: DeicingArea # A An area comprising an inner area for the parking of an aircraft to receive de-icing treatment and an outer area for the manoeuvring of two or more mobile de-icing equipment.
+      - category: AirportHeliport
+        family: Apron # A defined area, on a land aerodrome/heliport, intended to accommodate aircraft/helicopters for purposes of loading and unloading passengers, mail or cargo, and for fuelling, parking or maintenance.
+        feature: PassengerLoadingBridge # Bridge for loading/unloading access to airplanes for passengers and crew.
+      - category: Routes
+        family: EnRoute
+        feature: RouteSegment # A portion of a route to be flown usually without an intermediate stop, as defined by two consecutive significant points.
+      - category: Routes
+        family: EnRoute
+        feature: ChangeOverPoint # The distance from the start of the route portion to the position where change over occurs for VOR defined routes.
+      - category: Routes
+        family: FlightRestrictions
+        feature: AirspaceBorderCrossing # A type of traffic flow condition element which consist of crossing the common border between two adjacent airspace, when flying directly from one airspace into the other airspace.
+      - category: Routes
+        family: FlightRestrictions
+        feature: FlightRestriction # A rule meant to regulate the use of the route network, by identifying a set of flights which fulfil a combination of elementary flow conditions and either forbidding them on a particular routing or obliging them to follow one routing out of a set of mandatory alternatives.
+      - category: Airspace
+        family: Airspace
+        feature: GeoBorder # A physical or political border. In general, it will be the border between two countries or States but could also be a coastline, the description of the bank of an important river, or any other geographical shape which can be named and used to describe the border of an airspace. If two countries/States have more than one common border, each one will be an occurrence of this entity.
+      - category: NavaidsPoints
+        family: VisualNavigation
+        feature: AeronauticalGroundLight #  A light specifically provided as an aid to air navigation, with the exception of obstacle lights and lights forming part of surface or approach lighting systems.
+      - category: Procedure
+        family: DepartureProcedure
+        feature: NavigationArea # An area specified by sectors with altitude or procedure descent gradient limitations for omnidirectional departures or Pilot navigation area.

@@ -1,0 +1,47 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.5.6"
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.18'
+    }
+}
+
+
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+        testCompileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    apply from: '../gradle/libraries.gradle'
+
+    dependencies {
+        annotationProcessor "org.projectlombok:lombok:${project.ext['lombok.version']}"
+
+        testImplementation "org.assertj:assertj-core:${project.ext['assertj.version']}"
+        testImplementation "org.junit.jupiter:junit-jupiter-api:${project.ext['junit-jupiter.version']}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${project.ext['junit-jupiter.version']}"
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}

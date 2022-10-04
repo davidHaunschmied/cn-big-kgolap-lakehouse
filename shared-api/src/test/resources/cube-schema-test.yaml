@@ -1,0 +1,74 @@
+schema:
+  dimensions:
+    location: # dimension
+      territory: # level
+        depth: 0 # important for order
+        rollUpLevel: ALL
+        javaDataType: java.lang.String
+      fir:
+        depth: 1
+        rollUpLevel: territory
+        javaDataType: java.lang.String
+      location:
+        depth: 2
+        rollUpLevel: fir
+        javaDataType: java.lang.String
+    topic:
+      category:
+        depth: 0
+        rollUpLevel: ALL
+        javaDataType: java.lang.String
+      family:
+        depth: 1
+        rollUpLevel: category
+        javaDataType: java.lang.String
+      feature:
+        depth: 2
+        rollUpLevel: family
+        javaDataType: java.lang.String
+
+    time:
+      year:
+        depth: 0
+        rollUpLevel: ALL
+        javaDataType: java.time.Year
+      month:
+        depth: 1
+        rollUpLevel: year
+        javaDataType: java.time.YearMonth
+      day:
+        depth: 2
+        rollUpLevel: month
+        javaDataType: java.time.LocalDate
+
+  hierarchies:
+    location:
+      - territory: Austria
+        fir: LOVV
+        location: LOWW
+      - territory: Austria
+        fir: LOVV
+        location: LOWS
+      - territory: Germany
+        fir: EDMM
+        location: EDJA
+      - territory: Germany
+        fir: EDMM
+        location: EDMO
+
+    topic:
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: AirportHeliport # A defined area on land or water (including any buildings, installations and equipment) intended to be used either wholly or in part for the arrival, departure and surface movement of aircraft/helicopters.
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: NonMovementArea # Area where aircraft cannot be seen by a control tower and therefore are restricted to move.
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: SurveyControlPoint # A monumented survey control point. Or A surveying reference point marked by a permanently fixed marker.
+      - category: AirportHeliport
+        family: AirportHeliport
+        feature: AirportHotSpot # A location on aerodrome movement area with a history or potential risk of collision or runway incursion, and where heightened attention by pilots/drivers is necessary.
+      - category: AirportHeliport
+        family: Apron
+        feature: ApronElement # Parts of a defined apron area. ApronElements may have functional characteristics defined in the ApronElement type. ApronElements may have jetway, fuel, towing, docking and ground power services.

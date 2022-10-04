@@ -1,0 +1,2 @@
+ext.appPort = 0
+apply from: '../gradle/spring-boot-svc-base.gradle'

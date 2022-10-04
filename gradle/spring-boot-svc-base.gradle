@@ -1,0 +1,44 @@
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+dependencies {
+    implementation 'org.jetbrains:annotations:20.1.0'
+    implementation project(':svc-shared')
+
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation ('org.springframework.boot:spring-boot-starter-web')
+    // compileOnly 'org.projectlombok:lombok'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    // annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'org.springdoc:springdoc-openapi-ui:1.5.2'
+
+    implementation('javax.xml.bind:jaxb-api:2.3.0')
+    implementation('javax.activation:activation:1.1')
+    implementation('org.glassfish.jaxb:jaxb-runtime:2.3.0')
+
+    runtimeOnly('redis.clients:jedis:4.1.1') // required to force version
+}
+
+task buildDockerImage(type: Exec, dependsOn: build) {
+    group 'build'
+    workingDir './'
+
+    //on windows:
+    commandLine 'docker', 'build', '-f', '../docker/spring/Dockerfile',
+            '--build-arg', "JAR_FILE=build/libs/${project.name}-${project.version}.jar",
+            '--build-arg', "APP_NAME=${project.name}",
+            '--build-arg', "PORT=${project.appPort}",
+            '-t', "${dockerBaseRepository}/${project.name}:${project.version}",
+            '.'
+}
+
+task pushDockerImage(type: Exec, dependsOn: buildDockerImage) {
+    group 'publish'
+    workingDir './'
+
+    commandLine 'docker', 'push', "${dockerBaseRepository}/${project.name}:${project.version}"
+}
