@@ -1,13 +1,14 @@
 buildscript {
     repositories {
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.5.6"
-        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.18'
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.7.18"
+        classpath "io.spring.gradle:dependency-management-plugin:1.1.4"
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
     }
 }
 
