@@ -1,16 +1,17 @@
 ext.appPort = 80
 
+def npmCmd = System.properties['os.name'].toLowerCase().contains('windows') ? 'npm.cmd' : 'npm'
+
 task npmInstall(type: Exec) {
   workingDir './'
 
-  // windows
-  commandLine 'npm.cmd', 'install'
+  commandLine npmCmd, 'install'
 }
 
 task npmBuildProd(type: Exec, dependsOn: npmInstall) {
   workingDir './'
 
-  commandLine 'npm.cmd', 'run', 'buildProd'
+  commandLine npmCmd, 'run', 'buildProd'
   tasks.build.dependsOn(it)
 }
 

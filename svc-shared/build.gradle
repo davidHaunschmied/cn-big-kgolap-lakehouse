@@ -11,6 +11,7 @@ dependencies {
     api "io.grpc:grpc-netty:${grpcVersion}"
     api "io.grpc:grpc-protobuf:${grpcVersion}"
     api "io.grpc:grpc-stub:${grpcVersion}"
+    api 'com.google.protobuf:protobuf-java:3.19.6'
 
     runtimeOnly project(':iwxxm-engine')
     runtimeOnly project(':aixm-engine')
@@ -22,46 +23,35 @@ dependencies {
 
     implementation 'com.amazonaws:aws-java-sdk-sqs:1.12.133'
 
-    implementation("org.springframework:spring-context-support:5.3.13")
-    implementation("org.springframework.boot:spring-boot-autoconfigure:2.6.0")
-    implementation('org.springframework:spring-web:5.3.13')
+    implementation("org.springframework:spring-context-support:5.3.31")
+    implementation("org.springframework.boot:spring-boot-autoconfigure:2.7.18")
+    implementation('org.springframework:spring-web:5.3.31')
 
-    implementation('org.springframework.data:spring-data-cassandra:3.3.0'){
+    implementation('org.springframework.data:spring-data-cassandra:3.4.18'){
         exclude group: 'redis.clients', module: 'jedis'
     }
 
 
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.6.0'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:2.7.18'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.6.0'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.18'
 
-    testImplementation('org.springframework:spring-test:5.3.13')
-    testImplementation('org.mockito:mockito-core:3.9.0')
+    testImplementation('org.springframework:spring-test:5.3.31')
+    testImplementation('org.mockito:mockito-core:4.8.1')
 
 }
-
-def genSrcDir = "$projectDir/src/generated"
 
 protobuf {
     // Configure the protoc executable
     protoc {
         // Download from repositories
-        artifact = 'com.google.protobuf:protoc:3.0.0'
+        artifact = 'com.google.protobuf:protoc:3.19.6'
     }
 
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.0.0-pre2'
-            // or
-            // path = 'tools/protoc-gen-grpc-java'
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
         }
-
-    }
-
-    generatedFilesBaseDir = genSrcDir
-
-    clean {
-        delete generatedFilesBaseDir
     }
 
     generateProtoTasks {
@@ -69,16 +59,4 @@ protobuf {
             grpc {}
         }
     }
-
-    // generatedFilesBaseDir = "$projectDir/gen"
 }
-
-sourceSets {
-    main {
-        java {
-            srcDir genSrcDir
-        }
-    }
-}
-
-tasks.build.dependsOn('generateProto')
